@@ -42,16 +42,20 @@ input,
 textarea,
 button {
   font: inherit;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+form {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1em;
 }
 
 label {
-  display: block;
-  margin-block: 1em;
+  display: contents;
 }
 
-input,
-textarea,
 button {
-  width: 100%;
-  box-sizing: border-box;
+  grid-column: 1 / -1;
 }
