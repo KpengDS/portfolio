@@ -7,34 +7,26 @@
     <link rel="stylesheet" href="../style.css">
 </head>
 <body>
-    <script type="module" src="../global.js"></script>
-
     <h1>Contact</h1>
-    <form action="mailto:k2peng@ucsd.com" method="POST" enctype="text/plain">
+    <form action="mailto:k2peng@ucsd.edu" method="GET">
 
     <label>
-        Email:
-        <input type="email" name="email">
+      Subject:
+      <input name="subject">
     </label>
 
     <br><br>
 
     <label>
-        Subject:
-        <input name="subject">
-    </label>
-
-    <br><br>
-
-    <label>
-        Message:
-        <textarea name="body"></textarea>
+      Message:
+      <textarea name="body"></textarea>
     </label>
 
     <br><br>
 
     <button>Send</button>
 
-</form>
+  </form>
+  <script type="module" src="../global.js"></script>
 </body>
 </html>
