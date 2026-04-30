@@ -122,3 +122,14 @@ time {
 select {
   font: inherit;
 }
+
+.project-year {
+  color: gray;
+  font-size: 0.9em;
+}
+
+#projects-pie-plot {
+  max-width: 20em;
+  margin-block: 2em;
+  overflow: visible;
+}
