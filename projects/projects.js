@@ -45,16 +45,26 @@ function renderPieChart(projectsGiven) {
     .attr('fill', colors(idx))
     .attr('class', idx === selectedIndex ? 'selected' : '')
     .on('click', () => {
-      selectedIndex = selectedIndex === idx ? -1 : idx;
+  selectedIndex = selectedIndex === idx ? -1 : idx;
 
-      svg
-        .selectAll('path')
-        .attr('class', (_, i) => (i === selectedIndex ? 'selected' : ''));
+  svg
+    .selectAll('path')
+    .attr('class', (_, i) => (i === selectedIndex ? 'selected' : ''));
 
-      legend
-        .selectAll('li')
-        .attr('class', (_, i) => (i === selectedIndex ? 'selected' : ''));
-    });
+  legend
+    .selectAll('li')
+    .attr('class', (_, i) => (i === selectedIndex ? 'selected' : ''));
+
+  if (selectedIndex === -1) {
+    renderProjects(projects, projectsContainer, 'h2');
+  } else {
+    let selectedYear = data[selectedIndex].label;
+
+    let filtered = projects.filter(p => p.year === selectedYear);
+
+    renderProjects(filtered, projectsContainer, 'h2');
+  }
+});
 });
 
     data.forEach((d, idx) => {
