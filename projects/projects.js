@@ -7,25 +7,16 @@ const projectsContainer = document.querySelector('.projects');
 const title = document.querySelector('.projects-title');
 const searchInput = document.querySelector('.searchBar');
 
-let selectedIndex = -1;
+let selectedYear = null;
 let query = '';
 
-function getFilteredProjects(query, selectedIndex) {
+function getFilteredProjects(query, selectedYear) {
   let filteredProjects = projects.filter((project) => {
     let values = Object.values(project).join('\n').toLowerCase();
     return values.includes(query.toLowerCase());
   });
 
-  if (selectedIndex !== -1) {
-    let rolledData = d3.rollups(
-      projects,
-      (v) => v.length,
-      (d) => d.year
-    );
-    let data = rolledData.map(([year, count]) => {
-      return { value: count, label: year };
-    });
-    const selectedYear = data[selectedIndex]?.label;
+  if (selectedYear) {
     filteredProjects = filteredProjects.filter((project) => project.year === selectedYear);
   }
 
@@ -65,20 +56,20 @@ function renderPieChart(projectsGiven) {
       .append('path')
       .attr('d', arc)
       .attr('fill', colors(idx))
-      .attr('class', idx === selectedIndex ? 'selected' : '')
+      .attr('class', data[idx].label === selectedYear ? 'selected' : '')
       .on('click', () => {
-        selectedIndex = selectedIndex === idx ? -1 : idx;
-        const filteredProjects = getFilteredProjects(query, selectedIndex);
+        selectedYear = selectedYear === data[idx].label ? null : data[idx].label;
+        const filteredProjects = getFilteredProjects(query, selectedYear);
         renderProjects(filteredProjects, projectsContainer, 'h2');
         title.textContent = filteredProjects.length + ' Projects';
 
         svg
           .selectAll('path')
-          .attr('class', (_, i) => (i === selectedIndex ? 'selected' : ''));
+          .attr('class', (_, i) => (data[i].label === selectedYear ? 'selected' : ''));
 
         legend
           .selectAll('li')
-          .attr('class', (_, i) => (i === selectedIndex ? 'selected' : ''));
+          .attr('class', (_, i) => (data[i].label === selectedYear ? 'selected' : ''));
       });
   });
 
@@ -86,28 +77,28 @@ function renderPieChart(projectsGiven) {
     legend
       .append('li')
       .attr('style', `--color:${colors(idx)}`)
-      .attr('class', idx === selectedIndex ? 'selected' : '')
+      .attr('class', d.label === selectedYear ? 'selected' : '')
       .html(`<span class="swatch"></span> ${d.label} <em>(${d.value})</em>`)
       .on('click', () => {
-        selectedIndex = selectedIndex === idx ? -1 : idx;
-        const filteredProjects = getFilteredProjects(query, selectedIndex);
+        selectedYear = selectedYear === d.label ? null : d.label;
+        const filteredProjects = getFilteredProjects(query, selectedYear);
         renderProjects(filteredProjects, projectsContainer, 'h2');
         title.textContent = filteredProjects.length + ' Projects';
 
         svg
           .selectAll('path')
-          .attr('class', (_, i) => (i === selectedIndex ? 'selected' : ''));
+          .attr('class', (_, i) => (data[i].label === selectedYear ? 'selected' : ''));
 
         legend
           .selectAll('li')
-          .attr('class', (_, i) => (i === selectedIndex ? 'selected' : ''));
+          .attr('class', (_, i) => (data[i].label === selectedYear ? 'selected' : ''));
       });
   });
 }
 
 searchInput.addEventListener('input', (event) => {
   query = event.target.value;
-  const filteredProjects = getFilteredProjects(query, selectedIndex);
+  const filteredProjects = getFilteredProjects(query, selectedYear);
   renderProjects(filteredProjects, projectsContainer, 'h2');
   renderPieChart(filteredProjects);
   title.textContent = filteredProjects.length + ' Projects';

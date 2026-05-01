@@ -126,6 +126,8 @@ select {
 .project-year {
   color: gray;
   font-size: 0.9em;
+  font-family: Baskerville;
+  font-variant-numeric: oldstyle-nums;
 }
 
 #projects-plot {
