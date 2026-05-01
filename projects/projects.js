@@ -7,6 +7,7 @@ const projectsContainer = document.querySelector('.projects');
 const title = document.querySelector('.projects-title');
 const searchInput = document.querySelector('.searchBar');
 
+let selectedIndex = -1;
 let query = '';
 
 title.textContent = projects.length + ' Projects';
@@ -38,21 +39,33 @@ function renderPieChart(projectsGiven) {
   legend.selectAll('li').remove();
 
   arcs.forEach((arc, idx) => {
-    svg
-      .append('path')
-      .attr('d', arc)
-      .attr('fill', colors(idx));
-  });
+  svg
+    .append('path')
+    .attr('d', arc)
+    .attr('fill', colors(idx))
+    .attr('class', idx === selectedIndex ? 'selected' : '')
+    .on('click', () => {
+      selectedIndex = selectedIndex === idx ? -1 : idx;
+
+      svg
+        .selectAll('path')
+        .attr('class', (_, i) => (i === selectedIndex ? 'selected' : ''));
+
+      legend
+        .selectAll('li')
+        .attr('class', (_, i) => (i === selectedIndex ? 'selected' : ''));
+    });
+});
 
   data.forEach((d, idx) => {
-    legend
-      .append('li')
-      .attr('style', `--color:${colors(idx)}`)
-      .html(`<span class="swatch"></span> ${d.label} <em>(${d.value})</em>`);
-  });
-}
+  legend
+    .append('li')
+    .attr('style', `--color:${colors(idx)}`)
+    .attr('class', idx === selectedIndex ? 'selected' : '')
+    .html(`<span class="swatch"></span> ${d.label} <em>(${d.value})</em>`);
+});
 
-searchInput.addEventListener('change', (event) => {
+searchInput.addEventListener('input', (event) => {
   query = event.target.value;
 
   let filteredProjects = projects.filter((project) => {

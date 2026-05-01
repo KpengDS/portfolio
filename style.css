@@ -167,3 +167,20 @@ select {
 .legend {
   flex: 1;
 }
+
+#projects-plot:has(path:hover) path:not(:hover) {
+  opacity: 0.5;
+}
+
+#projects-plot path {
+  transition: 300ms;
+  cursor: pointer;
+}
+
+.selected {
+  --color: oklch(60% 45% 0) !important;
+}
+
+.selected:is(path) {
+  fill: var(--color);
+}
