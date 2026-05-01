@@ -14,11 +14,38 @@ title.textContent = projects.length + ' Projects';
 renderProjects(projects, projectsContainer, 'h2');
 renderPieChart(projects);
 
+function getFilteredProjects() {
+  let result = projects;
+
+  if (query) {
+    result = result.filter((project) => {
+      let values = Object.values(project).join('\n').toLowerCase();
+      return values.includes(query.toLowerCase());
+    });
+  }
+
+  if (selectedIndex !== -1) {
+    let years = d3.rollups(
+      result,
+      (v) => v.length,
+      (d) => d.year
+    ).map(([year, count]) => ({ value: count, label: year }));
+
+    let selectedYear = years[selectedIndex]?.label;
+
+    if (selectedYear) {
+      result = result.filter((project) => project.year === selectedYear);
+    }
+  }
+
+  return result;
+}
+
 function renderPieChart(projectsGiven) {
   let rolledData = d3.rollups(
     projectsGiven,
     (v) => v.length,
-    (d) => d.year,
+    (d) => d.year
   );
 
   let data = rolledData.map(([year, count]) => {
@@ -39,35 +66,22 @@ function renderPieChart(projectsGiven) {
   legend.selectAll('li').remove();
 
   arcs.forEach((arc, idx) => {
-  svg
-    .append('path')
-    .attr('d', arc)
-    .attr('fill', colors(idx))
-    .attr('class', idx === selectedIndex ? 'selected' : '')
-    .on('click', () => {
-  selectedIndex = selectedIndex === idx ? -1 : idx;
+    svg
+      .append('path')
+      .attr('d', arc)
+      .attr('fill', colors(idx))
+      .attr('class', idx === selectedIndex ? 'selected' : '')
+      .on('click', () => {
+        selectedIndex = selectedIndex === idx ? -1 : idx;
 
-  svg
-    .selectAll('path')
-    .attr('class', (_, i) => (i === selectedIndex ? 'selected' : ''));
+        let filtered = getFilteredProjects();
 
-  legend
-    .selectAll('li')
-    .attr('class', (_, i) => (i === selectedIndex ? 'selected' : ''));
+        renderProjects(filtered, projectsContainer, 'h2');
+        renderPieChart(filtered);
+      });
+  });
 
-  if (selectedIndex === -1) {
-    renderProjects(projects, projectsContainer, 'h2');
-  } else {
-    let selectedYear = data[selectedIndex].label;
-
-    let filtered = projects.filter(p => p.year === selectedYear);
-
-    renderProjects(filtered, projectsContainer, 'h2');
-  }
-});
-});
-
-    data.forEach((d, idx) => {
+  data.forEach((d, idx) => {
     legend
       .append('li')
       .attr('style', `--color:${colors(idx)}`)
@@ -79,11 +93,8 @@ function renderPieChart(projectsGiven) {
 searchInput.addEventListener('input', (event) => {
   query = event.target.value;
 
-  let filteredProjects = projects.filter((project) => {
-    let values = Object.values(project).join('\n').toLowerCase();
-    return values.includes(query.toLowerCase());
-  });
+  let filtered = getFilteredProjects();
 
-  renderProjects(filteredProjects, projectsContainer, 'h2');
-  renderPieChart(filteredProjects);
+  renderProjects(filtered, projectsContainer, 'h2');
+  renderPieChart(filtered);
 });
