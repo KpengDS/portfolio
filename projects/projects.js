@@ -7,35 +7,40 @@ const projectsContainer = document.querySelector('.projects');
 const title = document.querySelector('.projects-title');
 const searchInput = document.querySelector('.searchBar');
 
-let selectedYear = null;
+let selectedIndex = -1;
 let query = '';
+
+function getFilteredProjects(query, selectedIndex) {
+  let filteredProjects = projects.filter((project) => {
+    let values = Object.values(project).join('\n').toLowerCase();
+    return values.includes(query.toLowerCase());
+  });
+
+  if (selectedIndex !== -1) {
+    let rolledData = d3.rollups(
+      projects,
+      (v) => v.length,
+      (d) => d.year
+    );
+    let data = rolledData.map(([year, count]) => {
+      return { value: count, label: year };
+    });
+    const selectedYear = data[selectedIndex]?.label;
+    filteredProjects = filteredProjects.filter((project) => project.year === selectedYear);
+  }
+
+  return filteredProjects;
+}
 
 title.textContent = projects.length + ' Projects';
 renderProjects(projects, projectsContainer, 'h2');
 renderPieChart(projects);
 
-function getFilteredProjects() {
-  let result = projects;
-
-  if (query) {
-    result = result.filter((project) => {
-      let values = Object.values(project).join('\n').toLowerCase();
-      return values.includes(query.toLowerCase());
-    });
-  }
-
-  if (selectedYear) {
-    result = result.filter((project) => project.year === selectedYear);
-  }
-
-  return result;
-}
-
 function renderPieChart(projectsGiven) {
   let rolledData = d3.rollups(
     projectsGiven,
     (v) => v.length,
-    (d) => d.year
+    (d) => d.year,
   );
 
   let data = rolledData.map(([year, count]) => {
@@ -60,14 +65,20 @@ function renderPieChart(projectsGiven) {
       .append('path')
       .attr('d', arc)
       .attr('fill', colors(idx))
-      .attr('class', data[idx].label === selectedYear ? 'selected' : '')
+      .attr('class', idx === selectedIndex ? 'selected' : '')
       .on('click', () => {
-        selectedYear = selectedYear === data[idx].label ? null : data[idx].label;
+        selectedIndex = selectedIndex === idx ? -1 : idx;
+        const filteredProjects = getFilteredProjects(query, selectedIndex);
+        renderProjects(filteredProjects, projectsContainer, 'h2');
+        title.textContent = filteredProjects.length + ' Projects';
 
-        let filtered = getFilteredProjects();
+        svg
+          .selectAll('path')
+          .attr('class', (_, i) => (i === selectedIndex ? 'selected' : ''));
 
-        renderProjects(filtered, projectsContainer, 'h2');
-        renderPieChart(filtered);
+        legend
+          .selectAll('li')
+          .attr('class', (_, i) => (i === selectedIndex ? 'selected' : ''));
       });
   });
 
@@ -75,16 +86,29 @@ function renderPieChart(projectsGiven) {
     legend
       .append('li')
       .attr('style', `--color:${colors(idx)}`)
-      .attr('class', d.label === selectedYear ? 'selected' : '')
-      .html(`<span class="swatch"></span> ${d.label} <em>(${d.value})</em>`);
+      .attr('class', idx === selectedIndex ? 'selected' : '')
+      .html(`<span class="swatch"></span> ${d.label} <em>(${d.value})</em>`)
+      .on('click', () => {
+        selectedIndex = selectedIndex === idx ? -1 : idx;
+        const filteredProjects = getFilteredProjects(query, selectedIndex);
+        renderProjects(filteredProjects, projectsContainer, 'h2');
+        title.textContent = filteredProjects.length + ' Projects';
+
+        svg
+          .selectAll('path')
+          .attr('class', (_, i) => (i === selectedIndex ? 'selected' : ''));
+
+        legend
+          .selectAll('li')
+          .attr('class', (_, i) => (i === selectedIndex ? 'selected' : ''));
+      });
   });
 }
 
 searchInput.addEventListener('input', (event) => {
   query = event.target.value;
-
-  let filtered = getFilteredProjects();
-
-  renderProjects(filtered, projectsContainer, 'h2');
-  renderPieChart(filtered);
+  const filteredProjects = getFilteredProjects(query, selectedIndex);
+  renderProjects(filteredProjects, projectsContainer, 'h2');
+  renderPieChart(filteredProjects);
+  title.textContent = filteredProjects.length + ' Projects';
 });
