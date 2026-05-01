@@ -57,13 +57,14 @@ function renderPieChart(projectsGiven) {
     });
 });
 
-  data.forEach((d, idx) => {
-  legend
-    .append('li')
-    .attr('style', `--color:${colors(idx)}`)
-    .attr('class', idx === selectedIndex ? 'selected' : '')
-    .html(`<span class="swatch"></span> ${d.label} <em>(${d.value})</em>`);
-});
+    data.forEach((d, idx) => {
+    legend
+      .append('li')
+      .attr('style', `--color:${colors(idx)}`)
+      .attr('class', idx === selectedIndex ? 'selected' : '')
+      .html(`<span class="swatch"></span> ${d.label} <em>(${d.value})</em>`);
+  });
+}
 
 searchInput.addEventListener('input', (event) => {
   query = event.target.value;
