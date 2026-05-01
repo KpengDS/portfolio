@@ -10,14 +10,19 @@ renderProjects(projects, projectsContainer, 'h2');
 const title = document.querySelector('.projects-title');
 title.textContent = projects.length + ' Projects';
 
+let data = [1, 2];
+
 let arcGenerator = d3.arc().innerRadius(0).outerRadius(50);
 
-let arc = arcGenerator({
-  startAngle: 0,
-  endAngle: 2 * Math.PI,
-});
+let sliceGenerator = d3.pie();
+let arcData = sliceGenerator(data);
+let arcs = arcData.map((d) => arcGenerator(d));
 
-d3.select('#projects-plot')
-  .append('path')
-  .attr('d', arc)
-  .attr('fill', 'red');
+let colors = ['gold', 'purple'];
+
+arcs.forEach((arc, idx) => {
+  d3.select('#projects-plot')
+    .append('path')
+    .attr('d', arc)
+    .attr('fill', colors[idx]);
+});
