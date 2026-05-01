@@ -23,12 +23,15 @@ function getFilteredProjects(query, selectedYear) {
   return filteredProjects;
 }
 
-function updatePage() {
+function updatePage(updatePie = true) {
   const filteredProjects = getFilteredProjects(query, selectedYear);
 
   renderProjects(filteredProjects, projectsContainer, 'h2');
-  renderPieChart(filteredProjects);
   title.textContent = filteredProjects.length + ' Projects';
+
+  if (updatePie) {
+    renderPieChart(filteredProjects);
+  }
 }
 
 function renderPieChart(projectsGiven) {
@@ -63,7 +66,15 @@ function renderPieChart(projectsGiven) {
       .attr('class', data[idx].label === selectedYear ? 'selected' : '')
       .on('click', () => {
         selectedYear = selectedYear === data[idx].label ? null : data[idx].label;
-        updatePage();
+        updatePage(false);
+
+        svg
+          .selectAll('path')
+          .attr('class', (_, i) => (data[i].label === selectedYear ? 'selected' : ''));
+
+        legend
+          .selectAll('li')
+          .attr('class', (_, i) => (data[i].label === selectedYear ? 'selected' : ''));
       });
   });
 
@@ -75,14 +86,23 @@ function renderPieChart(projectsGiven) {
       .html(`<span class="swatch"></span> ${d.label} <em>(${d.value})</em>`)
       .on('click', () => {
         selectedYear = selectedYear === d.label ? null : d.label;
-        updatePage();
+        updatePage(false);
+
+        svg
+          .selectAll('path')
+          .attr('class', (_, i) => (data[i].label === selectedYear ? 'selected' : ''));
+
+        legend
+          .selectAll('li')
+          .attr('class', (_, i) => (data[i].label === selectedYear ? 'selected' : ''));
       });
   });
 }
 
 searchInput.addEventListener('input', (event) => {
   query = event.target.value;
-  updatePage();
+  selectedYear = null;
+  updatePage(true);
 });
 
 updatePage();
