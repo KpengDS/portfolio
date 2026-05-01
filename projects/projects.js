@@ -77,7 +77,6 @@ function renderPieChart(projectsGiven) {
         let filtered = getFilteredProjects();
 
         renderProjects(filtered, projectsContainer, 'h2');
-        renderPieChart(filtered);
       });
   });
 
