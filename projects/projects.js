@@ -7,7 +7,7 @@ const projectsContainer = document.querySelector('.projects');
 const title = document.querySelector('.projects-title');
 const searchInput = document.querySelector('.searchBar');
 
-let selectedIndex = -1;
+let selectedYear = null;
 let query = '';
 
 title.textContent = projects.length + ' Projects';
@@ -24,18 +24,8 @@ function getFilteredProjects() {
     });
   }
 
-  if (selectedIndex !== -1) {
-    let years = d3.rollups(
-      result,
-      (v) => v.length,
-      (d) => d.year
-    ).map(([year, count]) => ({ value: count, label: year }));
-
-    let selectedYear = years[selectedIndex]?.label;
-
-    if (selectedYear) {
-      result = result.filter((project) => project.year === selectedYear);
-    }
+  if (selectedYear) {
+    result = result.filter((project) => project.year === selectedYear);
   }
 
   return result;
@@ -70,13 +60,14 @@ function renderPieChart(projectsGiven) {
       .append('path')
       .attr('d', arc)
       .attr('fill', colors(idx))
-      .attr('class', idx === selectedIndex ? 'selected' : '')
+      .attr('class', data[idx].label === selectedYear ? 'selected' : '')
       .on('click', () => {
-        selectedIndex = selectedIndex === idx ? -1 : idx;
+        selectedYear = selectedYear === data[idx].label ? null : data[idx].label;
 
         let filtered = getFilteredProjects();
 
         renderProjects(filtered, projectsContainer, 'h2');
+        renderPieChart(filtered);
       });
   });
 
@@ -84,7 +75,7 @@ function renderPieChart(projectsGiven) {
     legend
       .append('li')
       .attr('style', `--color:${colors(idx)}`)
-      .attr('class', idx === selectedIndex ? 'selected' : '')
+      .attr('class', d.label === selectedYear ? 'selected' : '')
       .html(`<span class="swatch"></span> ${d.label} <em>(${d.value})</em>`);
   });
 }
