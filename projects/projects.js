@@ -7,6 +7,20 @@ const projectsContainer = document.querySelector('.projects');
 
 renderProjects(projects, projectsContainer, 'h2');
 
+let query = '';
+
+let searchInput = document.querySelector('.searchBar');
+
+searchInput.addEventListener('change', (event) => {
+  query = event.target.value;
+
+  let filteredProjects = projects.filter((project) =>
+    project.title.includes(query)
+  );
+
+  renderProjects(filteredProjects, projectsContainer, 'h2');
+});
+
 const title = document.querySelector('.projects-title');
 title.textContent = projects.length + ' Projects';
 
