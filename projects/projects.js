@@ -23,9 +23,13 @@ function getFilteredProjects(query, selectedYear) {
   return filteredProjects;
 }
 
-title.textContent = projects.length + ' Projects';
-renderProjects(projects, projectsContainer, 'h2');
-renderPieChart(projects);
+function updatePage() {
+  const filteredProjects = getFilteredProjects(query, selectedYear);
+
+  renderProjects(filteredProjects, projectsContainer, 'h2');
+  renderPieChart(filteredProjects);
+  title.textContent = filteredProjects.length + ' Projects';
+}
 
 function renderPieChart(projectsGiven) {
   let rolledData = d3.rollups(
@@ -59,17 +63,7 @@ function renderPieChart(projectsGiven) {
       .attr('class', data[idx].label === selectedYear ? 'selected' : '')
       .on('click', () => {
         selectedYear = selectedYear === data[idx].label ? null : data[idx].label;
-        const filteredProjects = getFilteredProjects(query, selectedYear);
-        renderProjects(filteredProjects, projectsContainer, 'h2');
-        title.textContent = filteredProjects.length + ' Projects';
-
-        svg
-          .selectAll('path')
-          .attr('class', (_, i) => (data[i].label === selectedYear ? 'selected' : ''));
-
-        legend
-          .selectAll('li')
-          .attr('class', (_, i) => (data[i].label === selectedYear ? 'selected' : ''));
+        updatePage();
       });
   });
 
@@ -81,25 +75,14 @@ function renderPieChart(projectsGiven) {
       .html(`<span class="swatch"></span> ${d.label} <em>(${d.value})</em>`)
       .on('click', () => {
         selectedYear = selectedYear === d.label ? null : d.label;
-        const filteredProjects = getFilteredProjects(query, selectedYear);
-        renderProjects(filteredProjects, projectsContainer, 'h2');
-        title.textContent = filteredProjects.length + ' Projects';
-
-        svg
-          .selectAll('path')
-          .attr('class', (_, i) => (data[i].label === selectedYear ? 'selected' : ''));
-
-        legend
-          .selectAll('li')
-          .attr('class', (_, i) => (data[i].label === selectedYear ? 'selected' : ''));
+        updatePage();
       });
   });
 }
 
 searchInput.addEventListener('input', (event) => {
   query = event.target.value;
-  const filteredProjects = getFilteredProjects(query, selectedYear);
-  renderProjects(filteredProjects, projectsContainer, 'h2');
-  renderPieChart(filteredProjects);
-  title.textContent = filteredProjects.length + ' Projects';
+  updatePage();
 });
+
+updatePage();
