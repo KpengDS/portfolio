@@ -17,7 +17,7 @@ let arc = arcGenerator({
   endAngle: 2 * Math.PI,
 });
 
-d3.select('#projects-pie-plot')
+d3.select('#projects-plot')
   .append('path')
   .attr('d', arc)
   .attr('fill', 'red');
