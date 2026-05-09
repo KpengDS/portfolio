@@ -1,4 +1,5 @@
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm';
+
 let xScale;
 let yScale;
 
@@ -20,7 +21,6 @@ function processCommits(data) {
     .groups(data, (d) => d.commit)
     .map(([commit, lines]) => {
       let first = lines[0];
-
       let { author, date, time, timezone, datetime } = first;
 
       let ret = {
@@ -47,9 +47,7 @@ function processCommits(data) {
 }
 
 function renderCommitInfo(data, commits) {
-  const dl = d3.select('#stats')
-    .append('dl')
-    .attr('class', 'stats');
+  const dl = d3.select('#stats').append('dl').attr('class', 'stats');
 
   dl.append('dt').html('Total <abbr title="Lines of code">LOC</abbr>');
   dl.append('dd').text(data.length);
@@ -66,12 +64,6 @@ function renderCommitInfo(data, commits) {
   dl.append('dt').text('Max depth');
   dl.append('dd').text(d3.max(data, d => d.depth));
 }
-
-let data = await loadData();
-
-let commits = processCommits(data);
-
-renderCommitInfo(data, commits);
 
 function renderScatterPlot(data, commits) {
   const width = 1000;
@@ -156,15 +148,17 @@ function renderScatterPlot(data, commits) {
     .attr('fill', 'steelblue')
     .style('fill-opacity', 0.7)
     .on('mouseenter', (event, commit) => {
-        d3.select(event.currentTarget).style('fill-opacity', 1);
-        renderTooltipContent(commit);
-        updateTooltipVisibility(true);
-        updateTooltipPosition(event);
+      d3.select(event.currentTarget).style('fill-opacity', 1);
+      renderTooltipContent(commit);
+      updateTooltipVisibility(true);
+      updateTooltipPosition(event);
     })
     .on('mouseleave', (event) => {
-        d3.select(event.currentTarget).style('fill-opacity', 0.7);
-        updateTooltipVisibility(false);
+      d3.select(event.currentTarget).style('fill-opacity', 0.7);
+      updateTooltipVisibility(false);
     });
+
+  createBrushSelector(svg);
 }
 
 function renderTooltipContent(commit) {
@@ -196,16 +190,12 @@ function updateTooltipVisibility(isVisible) {
 function updateTooltipPosition(event) {
   const tooltip = document.getElementById('commit-tooltip');
 
-  tooltip.style.left = `${event.clientX}px`;
-  tooltip.style.top = `${event.clientY}px`;
+  tooltip.style.left = `${event.clientX + 10}px`;
+  tooltip.style.top = `${event.clientY + 10}px`;
 }
-
-createBrushSelector(svg);
-renderScatterPlot(data, commits);
 
 function createBrushSelector(svg) {
   svg.call(d3.brush().on('start brush end', brushed));
-
   svg.selectAll('.dots, .overlay ~ *').raise();
 }
 
@@ -213,7 +203,7 @@ function brushed(event) {
   const selection = event.selection;
 
   d3.selectAll('circle').classed('selected', (d) =>
-    isCommitSelected(selection, d),
+    isCommitSelected(selection, d)
   );
 
   renderSelectionCount(selection);
@@ -233,3 +223,55 @@ function isCommitSelected(selection, commit) {
   return x >= x0 && x <= x1 && y >= y0 && y <= y1;
 }
 
+function renderSelectionCount(selection) {
+  const selectedCommits = selection
+    ? commits.filter((d) => isCommitSelected(selection, d))
+    : [];
+
+  const countElement = document.querySelector('#selection-count');
+
+  countElement.textContent = `${
+    selectedCommits.length || 'No'
+  } commits selected`;
+
+  return selectedCommits;
+}
+
+function renderLanguageBreakdown(selection) {
+  const selectedCommits = selection
+    ? commits.filter((d) => isCommitSelected(selection, d))
+    : [];
+
+  const container = document.getElementById('language-breakdown');
+
+  if (selectedCommits.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const lines = selectedCommits.flatMap((d) => d.lines);
+
+  const breakdown = d3.rollup(
+    lines,
+    (v) => v.length,
+    (d) => d.type
+  );
+
+  container.innerHTML = '';
+
+  for (const [language, count] of breakdown) {
+    const proportion = count / lines.length;
+    const formatted = d3.format('.1~%')(proportion);
+
+    container.innerHTML += `
+      <dt>${language}</dt>
+      <dd>${count} lines (${formatted})</dd>
+    `;
+  }
+}
+
+let data = await loadData();
+let commits = processCommits(data);
+
+renderCommitInfo(data, commits);
+renderScatterPlot(data, commits);
