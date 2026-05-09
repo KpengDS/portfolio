@@ -209,3 +209,7 @@ select {
   stroke: lightgray;
   stroke-opacity: 0.4;
 }
+
+.gridlines path {
+  display: none;
+}
